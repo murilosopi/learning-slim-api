@@ -1,58 +1,67 @@
 <?php
 
+use \Psr\Http\Message\ServerRequestInterface as Request;
+use \Psr\Http\Message\ResponseInterface as Response;
+
 require 'vendor/autoload.php';
 
 $app = new \Slim\App;
 
-// Criação de uma rota
-$app->get('/postagens2', function() {
-    echo 'Listagem de postagens';
+// Padrão PSR7 e verbos HTTP
+
+// SELECT
+$app->get('/postagens', function(Request $request, Response $response) {
+    // echo 'Listagem de postagens';
+
+    $response->getBody()->write('Listagem de postagens');
+    return $response;
 });
 
-// Rota utilizando placeholder e Regex
-// [] -> Atributo opcional
+$app->post('/usuarios/adiciona', function(Request $request, Response $response) {
+    // Recupera post ($_POST)
+    $post = $request->getParsedBody();
+    $nome = $post['nome'];
+    $email = $post['email'];
 
-$app->get('/usuarios[/{id:[0-9]*}]', function($Request, $Response) {
-    $id = $Request->getAttribute('id');
-    echo 'Listagem de usuários ou id: ' . $id;
+    /*
+    INSERT INTO
+    ...
+    */
+
+    $response->getBody()->write( 'Sucesso' );
+    return $response;
 });
 
-$app->get('/postagens[/{ano}[/{mes}]]', function($Request, $Response) {
-    $mes = $Request->getAttribute('mes');
-    $ano = $Request->getAttribute('ano');
+$app->put('/usuarios/atualiza', function(Request $request, Response $response) {
+    $body = $request->getParsedBody();
+    $nome = $body['nome'];
+    $email = $body['email'];
+    $id = $body['id'];
 
-    echo "Listagem de postagens: <br> **/$mes/$ano";
+    /*
+    UPDATE
+    ...
+    */
+    
+    $response->getBody()->write( 'Sucesso ao atualizar: #' . $id );
+    return $response;
 });
 
-$app->get('/lista/{itens:[a-zA-Z/]*}', function($Request, $Response) {
-    $itens = $Request->getAttribute('itens');
+$app->delete('/usuarios/exclui/{id}', function(Request $request, Response $response) {
+    $id = $request->getAttribute('id');
 
-    var_dump(explode('/', $itens));
+    /*
+    DELETE FROM
+    ...
+    */
+
+    $response->getBody()->write( 'Sucesso ao excluir: #' . $id);
+    return $response;
 });
 
-// Nome de rotas
-$app->get('/blog/postagens/{id}', function($Request, $Response) {
-    echo 'Listar postagens para um ID';
-})->setName('blog');
 
-// Recupera uma rota a partir de seu nome.
-$app->get('/meusite', function($Request, $Response) {
-    $retorno = $this->get('router')->pathFor('blog', ['id' => "5"]);
-
-    echo $retorno;
-});
-
-// Agrupamento de rotas
-$app->group('/v1', function() {
-    $this->get('/usuarios', function() {
-        echo 'Listagem de usuários - Versão 1';
-    });
-
-    $this->get('/postagens', function() {
-        echo 'Listagem de postagens - Versão 1';
-    });
-});
 
 $app->run();
+
 
 ?>
