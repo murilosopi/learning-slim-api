@@ -11,24 +11,30 @@ $app = new \Slim\App([
     ]
 ]);
 
-// Tipos de respostas
-$app->get('/header', function($request, $response) {
-    $response->write('Retorno <strong>header</strong>');
+// Middleware: camada de execução antes e depois do core da aplicação (neste caso, as rotas)
 
-    return $response->withHeader('allow', 'PUT')
-                    ->withAddedHeader('Content-Length', 30);
+$app->add(function($request, $response, $next) {
+    $response->write('Middleware 1 + ');
+    // return $next($request, $response); # Apenas uma validação, seguida pela execução da rota
+
+    $response = $next($request, $response); # Executa a rota
+
+    return $response->write('+ Fim middleware 1');
 });
 
-$app->get('/json', function($request, $response) {
-    $usuario = ['email' => 'user@gmail.com', 'senha' => 'user123'];
-    return $response->withJson($usuario);
+/* O primeiro e último middleware a ser executado
+$app->add(function($request, $response, $next) {
+    $response->write('Middleware 2 + ');
+    return $next($request, $response);
+});
+*/
+
+$app->get('/usuarios', function($request, $response) {
+    $response->write('Ação principal - <strong>Usuários</strong>: ');
 });
 
-$app->get('/xml', function($request, $response) {
-    $xml = file_get_contents(__DIR__ . '/src/assets/produto.xml');
-    $response->write($xml);
-
-    return $response->withHeader('Content-Type', 'application/xml');
+$app->get('/postagens', function($request, $response) {
+    $response->write('Ação principal - <strong>Postagens</strong>: ');
 });
 
 $app->run();
