@@ -11,34 +11,25 @@ $app = new \Slim\App([
     ]
 ]);
 
-// Container dependency injection
-class Servico {
+// Tipos de respostas
+$app->get('/header', function($request, $response) {
+    $response->write('Retorno <strong>header</strong>');
 
-}
-
-// Container Pimple
-$container = $app->getContainer();
-$container['servico'] = function() { return new Servico; };
-
-$app->get('/servico', function(Request $request, Response $response) {
-
-    $servico = $this->get('servico');
-    var_dump($servico);
-
+    return $response->withHeader('allow', 'PUT')
+                    ->withAddedHeader('Content-Length', 30);
 });
 
-// Controllers como serviço:
-$container['home'] = function() { 
-    return new \MyApp\Controllers\Home(new \MyApp\View); 
-};
-$app->get('/usuario', 'home:index');
+$app->get('/json', function($request, $response) {
+    $usuario = ['email' => 'user@gmail.com', 'senha' => 'user123'];
+    return $response->withJson($usuario);
+});
 
-/*
-O próprio Slim instancia o controller e envia a view como serviço:
+$app->get('/xml', function($request, $response) {
+    $xml = file_get_contents(__DIR__ . '/src/assets/produto.xml');
+    $response->write($xml);
 
-$container['view'] = function() { return new \MyApp\View; };
-$app->get('/usuario', '\MyApp\Controllers\Home:index');
-*/
+    return $response->withHeader('Content-Type', 'application/xml');
+});
 
 $app->run();
 
